@@ -7,15 +7,11 @@ This project involves the design, development, and testing of a buzzer system in
 
 The project follows a structured approach starting from software simulation and progressing toward full hardware implementation.
 
----
-
 ## Objectives
 - To design a functional buzzer input system  
 - To implement an LED display system for visual feedback  
 - To develop an audio/sound system for user feedback  
 - To ensure correct system behavior through simulation prior to hardware integration  
-
----
 
 ## System Description
 
@@ -33,8 +29,6 @@ The project follows a structured approach starting from software simulation and 
 - Generates sound signals for system events  
 - Provides feedback such as buzzer activation or timeout  
 
----
-
 ## System Workflow
 1. The system waits for contestant input  
 2. A button press is detected  
@@ -44,8 +38,6 @@ The project follows a structured approach starting from software simulation and 
    - Audio feedback through the sound system  
 5. The system resets for the next round  
 
----
-
 ## Software Simulation
 The system is initially validated through software simulation by testing each module individually and as an integrated system.
 
@@ -53,8 +45,6 @@ Simulation verifies that:
 - Inputs are correctly detected  
 - Outputs respond according to system logic  
 - The system behaves correctly under different conditions  
-
----
 
 ## Implementation Scope
 This repository contains:
