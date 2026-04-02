@@ -1,5 +1,3 @@
-# buzzer-system
-ECE21120 Final Project Design
 # Buzzer System
 
 ## Overview
