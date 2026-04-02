@@ -57,7 +57,7 @@ Set:
 
 Run in terminal:
 ```
-git clone <REPO_LINK>  
+git clone https://github.com/draemonsi/buzzer-system.git
 cd buzzer-system  
 code .  
 ```
