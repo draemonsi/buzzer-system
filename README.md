@@ -56,11 +56,11 @@ Set:
 ## 🧠 4. Clone the Repository
 
 Run in terminal:
-
+```
 git clone <REPO_LINK>  
 cd buzzer-system  
 code .  
-
+```
 ---
 
 ## 🌿 5. Branching Workflow (IMPORTANT)
