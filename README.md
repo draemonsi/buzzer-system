@@ -127,7 +127,7 @@ Run the following command in your terminal:
 echo "===== SETUP VERIFICATION =====" && \
 echo "\n[VS CODE VERSION]" && code --version && \
 echo "\n[GIT VERSION]" && git --version && \
-echo "\n[PLATFORMIO VERSION]" && pio --version && \
+echo "\n[PLATFORMIO EXTENSION]" && code --list-extensions | grep platformio && \
 echo "\n[INSTALLED EXTENSIONS]" && code --list-extensions
 ```
 ---
