@@ -1,51 +1,163 @@
-# Buzzer System
+# ⚙️ Software Setup Guide – Buzzer System
 
-## Overview
-This project involves the design, development, and testing of a buzzer system intended for quiz or game-based applications. The system detects contestant inputs, determines the first valid response, and provides corresponding visual and audio feedback.
+Welcome to the Software Team.
 
-The project follows a structured approach starting from software simulation and progressing toward full hardware implementation.
+Before contributing, you must complete this setup to ensure everyone is working in the same environment.
 
-## Objectives
-- To design a functional buzzer input system  
-- To implement an LED display system for visual feedback  
-- To develop an audio/sound system for user feedback  
-- To ensure correct system behavior through simulation prior to hardware integration  
+---
 
-## System Description
+## 🧠 1. Install Required Tools
 
-### 1. Buzzer Input System
-- Accepts inputs from multiple contestants through push buttons  
-- Detects and processes the first valid button press  
-- Ensures reliable and accurate input detection  
+### 1.1 Install Visual Studio Code
+Download and install:
+https://code.visualstudio.com/
 
-### 2. LED Display System
-- Provides visual indication of system status  
-- Identifies the contestant who pressed first  
-- Displays system responses during operation  
+During installation:
+- Enable "Add to PATH"
 
-### 3. Audio / Sound System
-- Generates sound signals for system events  
-- Provides feedback such as buzzer activation or timeout  
+---
 
-## System Workflow
-1. The system waits for contestant input  
-2. A button press is detected  
-3. The first valid input is identified  
-4. The system outputs:
-   - Visual feedback through LEDs  
-   - Audio feedback through the sound system  
-5. The system resets for the next round  
+### 1.2 Install Git
 
-## Software Simulation
-The system is initially validated through software simulation by testing each module individually and as an integrated system.
+Download:
+https://git-scm.com/
 
-Simulation verifies that:
-- Inputs are correctly detected  
-- Outputs respond according to system logic  
-- The system behaves correctly under different conditions  
+Verify installation:
 
-## Implementation Scope
-This repository contains:
-- Source code for system logic and control  
-- Simulation files and test cases  
-- Documentation related to system design and behavior  
+git --version
+
+---
+
+## 🔧 2. Install VS Code Extensions
+
+Open terminal and run:
+
+code --install-extension platformio.platformio-ide  
+code --install-extension GitHub.vscode-pull-request-github  
+code --install-extension esbenp.prettier-vscode  
+code --install-extension PKief.material-icon-theme  
+code --install-extension ms-vscode.cpptools  
+code --install-extension usernamehw.errorlens  
+
+---
+
+## 🔌 3. PlatformIO Setup
+
+1. Open VS Code  
+2. Click the PlatformIO icon (alien icon 👽)  
+3. Click "New Project"
+
+Set:
+- Board: Arduino Mega 2560  
+- Framework: Arduino  
+
+---
+
+## 🧠 4. Clone the Repository
+
+Run in terminal:
+
+git clone <REPO_LINK>  
+cd buzzer-system  
+code .  
+
+---
+
+## 🌿 5. Branching Workflow (IMPORTANT)
+
+🚨 DO NOT push directly to main 🚨
+
+### Create your own branch:
+
+git checkout -b feature-yourname-task  
+
+Example:
+
+git checkout -b feature-andrei-input-system  
+
+---
+
+### After making changes:
+
+git add .  
+git commit -m "your message"  
+git push origin feature-yourname-task  
+
+Then create a Pull Request on GitHub.
+
+---
+
+## 🧩 6. Project Structure
+
+code/  
+  main/  
+  modules/  
+simulation/  
+docs/  
+
+- main/ → main system code  
+- modules/ → input, logic, output  
+- simulation/ → test files  
+- docs/ → diagrams  
+
+---
+
+## 🧠 7. Team Rules
+
+- Do NOT edit main directly  
+- Do NOT overwrite others' code  
+- Always use branches  
+- Keep commits clear and meaningful  
+- Test your code before pushing  
+
+---
+
+## 🏁 8. First Task
+
+Once setup is complete:
+- Confirm in the group chat  
+- Wait for task assignment  
+
+---
+
+## ✅ 9. Setup Verification (REQUIRED)
+
+Run the following command in your terminal:
+
+echo "===== SETUP VERIFICATION =====" && \
+echo "\n[VS CODE VERSION]" && code --version && \
+echo "\n[GIT VERSION]" && git --version && \
+echo "\n[PLATFORMIO VERSION]" && pio --version && \
+echo "\n[INSTALLED EXTENSIONS]" && code --list-extensions
+
+---
+
+### 📸 Screenshot Requirement
+
+Take ONE screenshot showing the full output.
+
+Make sure it includes:
+- VS Code version  
+- Git version  
+- PlatformIO version  
+- Installed extensions  
+
+---
+
+### 📤 Submission
+
+Send your screenshot in the group chat.
+
+---
+
+### ⚠️ Note
+
+If any part fails:
+- Fix your setup first  
+- Ask in the group chat  
+
+---
+
+### 🏁 Completion
+
+No screenshot = not setup ❌  
