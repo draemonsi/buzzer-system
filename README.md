@@ -24,21 +24,21 @@ https://git-scm.com/
 
 Verify installation:
 
-git --version
+```git --version```
 
 ---
 
 ## 🔧 2. Install VS Code Extensions
 
 Open terminal and run:
-
+```
 code --install-extension platformio.platformio-ide  
 code --install-extension GitHub.vscode-pull-request-github  
 code --install-extension esbenp.prettier-vscode  
 code --install-extension PKief.material-icon-theme  
 code --install-extension ms-vscode.cpptools  
 code --install-extension usernamehw.errorlens  
-
+```
 ---
 
 ## 🔌 3. PlatformIO Setup
@@ -68,21 +68,21 @@ code .
 🚨 DO NOT push directly to main 🚨
 
 ### Create your own branch:
-
+```
 git checkout -b feature-yourname-task  
-
+```
 Example:
-
+```
 git checkout -b feature-andrei-input-system  
-
+```
 ---
 
 ### After making changes:
-
+```
 git add .  
 git commit -m "your message"  
 git push origin feature-yourname-task  
-
+```
 Then create a Pull Request on GitHub.
 
 ---
@@ -123,13 +123,13 @@ Once setup is complete:
 ## ✅ 9. Setup Verification (REQUIRED)
 
 Run the following command in your terminal:
-
+```
 echo "===== SETUP VERIFICATION =====" && \
 echo "\n[VS CODE VERSION]" && code --version && \
 echo "\n[GIT VERSION]" && git --version && \
 echo "\n[PLATFORMIO VERSION]" && pio --version && \
 echo "\n[INSTALLED EXTENSIONS]" && code --list-extensions
-
+```
 ---
 
 ### 📸 Screenshot Requirement
@@ -155,8 +155,6 @@ Send your screenshot in the group chat.
 If any part fails:
 - Fix your setup first  
 - Ask in the group chat  
-
----
 
 ### 🏁 Completion
 
