@@ -1,90 +1,106 @@
 #include "BuzzerOutput.h"
-
-// Note: Added two libraries for led strip and display
-
 #include <Adafruit_NeoPixel.h>
-#include <LiquidCrystal_I2C.h>
+#include <DFRobotDFPlayerMini.h> 
+#include <SPI.h>
+#include <Adafruit_GFX.h>
+#include <Adafruit_ILI9341.h>
 
-// --- OBJECT INITIALIZATION ---
 Adafruit_NeoPixel strip(NUM_LEDS, LED_PIN, NEO_GRB + NEO_KHZ800);
-LiquidCrystal_I2C lcd(0x27, 16, 2); 
+DFRobotDFPlayerMini myDFPlayer;  
+Adafruit_ILI9341 tft = Adafruit_ILI9341(TFT_CS, TFT_DC, TFT_RST);
 
-// --- INTERNAL VARIABLES ---
-unsigned long rainbowTimer = 0;
-bool isRainbowActive = false;
-long rainbowHue = 0;
+unsigned long rainbowTimer = 0;      
+bool isRainbowActive = false;        
+long rainbowHue = 0;                  
+bool isMp3Online = false; 
 
-//        INTERNAL HELPER FUNCTIONS
+// Internal Helper Functions
 
-// Quickly sets the entire LED strip to a single color
 void setLEDColor(uint32_t color) {
-  for(int i = 0; i < strip.numPixels(); i++) {
+  for(uint16_t i = 0; i < strip.numPixels(); i++) {
     strip.setPixelColor(i, color);
   }
   strip.show();
 }
 
-// Handles the non-blocking rainbow animation
 void updateRainbowEffect() {
-  // Uses millis() instead of delay() so it doesn't freeze the rest of the code
-  // Updates the frame every 20ms
   if (millis() - rainbowTimer > 20) { 
     rainbowTimer = millis();
-    for(int i = 0; i < strip.numPixels(); i++) {
-      // 65536 is the max hue in Adafruit_NeoPixel. This math spreads the colors evenly.
+    for(uint16_t i = 0; i < strip.numPixels(); i++) {
       int pixelHue = rainbowHue + (i * 65536L / strip.numPixels());
       strip.setPixelColor(i, strip.gamma32(strip.ColorHSV(pixelHue)));
     }
     strip.show();
-    rainbowHue += 256; // Shift the colors for the next frame
+    rainbowHue += 256; 
     if(rainbowHue >= 65536) rainbowHue = 0;
   }
 }
 
-//          PUBLIC FUNCTIONS
+void updateScreenUI(String header, String subtext, uint16_t headerColor, uint16_t subtextColor) {
+  tft.fillScreen(ILI9341_BLACK); 
+  
+  tft.setCursor(10, 40);
+  tft.setTextColor(headerColor);
+  tft.setTextSize(3); 
+  tft.print(header);
+  
+  tft.setCursor(10, 110);
+  tft.setTextColor(subtextColor);
+  tft.setTextSize(5); 
+  tft.print(subtext);
+}
+
+// System Initialization
 
 void initOutputs() {
-  // 1. Initialize LEDs
+  // 1. Initialize Solid-State Lighting
   strip.begin();
   strip.setBrightness(100); 
   strip.show(); 
-
-  // 2. Initialize Mic Relay & Buzzer
-  pinMode(MIC_RELAY, OUTPUT);
-  pinMode(BUZZER_PIN, OUTPUT);
   
-  // 3. Initialize LCD
-  lcd.init();
-  lcd.backlight();
-  lcd.clear();
+  // 3. Initialize TFT Display Bus
+  tft.begin();
+  tft.setRotation(1); // Landscape orientation (320x240)
+  tft.fillScreen(ILI9341_BLACK);
 
-  Serial.println("System Online (MP3 Disabled for Simulation).");
+  // 4. Initialize UART Audio Module
+  Serial1.begin(9600);
+  Serial.println("SYS: Initializing DFPlayer Audio Module...");
   
+  // Verify hardware handshake to prevent blocking functions later
+  if (!myDFPlayer.begin(Serial1)) {
+    Serial.println("ERR: DFPlayer Not Found. Enabling UART failsafe (Simulation Mode).");
+    isMp3Online = false; 
+  } else {
+    Serial.println("SYS: DFPlayer Online.");
+    myDFPlayer.volume(25);  
+    isMp3Online = true;
+  }
+  
+
   triggerInitialSettings(); 
 }
 
 void updateOutputs() {
-  // Only animate the LEDs if a contestant currently has the floor
   if (isRainbowActive) {
     updateRainbowEffect();
   }
 }
 
-// --- The Flowchart Triggers ---
+//Even Triggers
 
 void triggerInitialSettings() {
-  digitalWrite(MIC_RELAY, LOW); // LOW turns the Relay OFF (Mic muted)
-  setLEDColor(strip.Color(0, 0, 0)); // Turn off LEDs
+  setLEDColor(strip.Color(0, 0, 0)); 
   isRainbowActive = false;
-  lcd.clear();
-  lcd.setCursor(0, 0);
-  lcd.print("System Ready    ");
+  updateScreenUI("SYSTEM STATUS", "READY", ILI9341_WHITE, ILI9341_LIGHTGREY);
 }
  
 void triggerWhiteSetting() {
-  digitalWrite(MIC_RELAY, LOW); // Contestant Mic OFF
   setLEDColor(strip.Color(255, 255, 255));
   isRainbowActive = false;
+  
+  // Implements a newline character to maintain textual bounds on the 320px x-axis
+  updateScreenUI("SYSTEM STATUS", "PLAYER\nDETECTED", ILI9341_WHITE, ILI9341_CYAN);
 }
 
 void triggerBlueSetting() {
@@ -98,61 +114,45 @@ void triggerOrangeSetting() {
 }
 
 void triggerStartQuestion() {
-  digitalWrite(MIC_RELAY, LOW); // Host is talking, ensure contestant is muted
+  updateScreenUI("READING QUESTION", "MIC MUTED", ILI9341_ORANGE, ILI9341_DARKGREY);
 }
 
-void triggerFloorClaimed() {
-  digitalWrite(MIC_RELAY, HIGH); // HIGH turns Relay ON (Contestant can speak!)
-  isRainbowActive = true;        // Start the rainbow animation
+void triggerFloorClaimed() { 
+  isRainbowActive = true;        //Continuous execution of updateRainbowEffect()
+  updateScreenUI("FLOOR CLAIMED", "5 sec", ILI9341_YELLOW, ILI9341_WHITE);
   
-  lcd.clear();
-  lcd.setCursor(0, 0);
-  lcd.print("Answer Timer:");
-
-  // Play a quick 1000Hz notification beep
-  tone(BUZZER_PIN, 1000); 
-  delay(200);
-  noTone(BUZZER_PIN);
+  if (isMp3Online) myDFPlayer.play(1); //Calling MP3 File
 }
 
 void triggerCorrectAnswer(int newPoints) {
-  digitalWrite(MIC_RELAY, LOW); // Round over, mute contestant
-  setLEDColor(strip.Color(0, 255, 0)); // Green for correct
+  setLEDColor(strip.Color(0, 255, 0)); 
   isRainbowActive = false;
   
-  // Play a happy double-beep
-  tone(BUZZER_PIN, 1500);
-  delay(100);
-  noTone(BUZZER_PIN);
-  delay(50);
-  tone(BUZZER_PIN, 1500);
-  delay(100);
-  noTone(BUZZER_PIN);
+  String pointText = "+" + String(newPoints) + " PTS";
+  updateScreenUI("CORRECT!", pointText, ILI9341_GREEN, ILI9341_WHITE);
   
-  // Update the scoreboard
-  lcd.clear();
-  lcd.setCursor(0, 0);
-  lcd.print("Points: ");
-  lcd.print(newPoints);
+  if (isMp3Online) myDFPlayer.play(2);  //Calling MP3 File
 }
 
 void triggerWrongOrTimeout() {
-  digitalWrite(MIC_RELAY, LOW); // Round over, mute contestant
-  setLEDColor(strip.Color(255, 0, 0)); // Red for wrong
+  setLEDColor(strip.Color(255, 0, 0)); 
   isRainbowActive = false;
-
-  // Play a low, long error buzz
-  tone(BUZZER_PIN, 400); 
-  delay(500);
-  noTone(BUZZER_PIN);
+  updateScreenUI("LOCKED OUT", "WRONG", ILI9341_RED, ILI9341_WHITE);
   
-  lcd.clear();
-  lcd.setCursor(0, 0);
-  lcd.print("Locked Out      ");
+  if (isMp3Online) myDFPlayer.play(3);  //Calling MP3 File
 }
 
 void updateLCDTimer(int remainingSeconds) {
-  lcd.setCursor(0, 1);
-  lcd.print(remainingSeconds);
-  lcd.print("s remaining   "); 
+  tft.fillRect(10, 110, 200, 50, ILI9341_BLACK); 
+  tft.setCursor(10, 110);
+  
+  if (remainingSeconds <= 2) {
+    tft.setTextColor(ILI9341_RED);
+  } else {
+    tft.setTextColor(ILI9341_WHITE);
+  }
+  
+  tft.setTextSize(5);
+  tft.print(remainingSeconds);
+  tft.print(" sec"); 
 }

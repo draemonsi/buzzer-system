@@ -3,33 +3,52 @@
 
 #include <Arduino.h>
 
-//       BUZZER & HARDWARE OUTPUT MODULE
+// Libraries Used:
+    //<Adafruit_NeoPixel.h>
+    //<DFRobotDFPlayerMini.h> 
+    //<SPI.h>
+    //<Adafruit_GFX.h>
+    //<Adafruit_ILI9341.h>
 
-//Contains all the functions for OUTPUT modules
-// the LEDs, LCD, Buzzer, and Contestant Mic.
+// IMPORTANT, CHANGE THE NUM_LEDS (16) IF MORE LED STRIPS ARE ADDED OR REMOVED
 
-// --- OUTPUT PIN DEFINITIONS ---
-// (Important for hardware implementation)
-#define LED_PIN     6       // Pin for the NeoPixel data line
-#define NUM_LEDS    16      // Total number of LEDs on the strip
-#define MIC_RELAY   7       // Pin controlling the Contestant Mic relay
-#define BUZZER_PIN  8       // Pin for the passive buzzer
+#define NUM_LEDS    16      // Total series count of LED modules
 
-// --- CORE FUNCTIONS ---
-void initOutputs();         // Call ONCE inside your main setup()
-void updateOutputs();       // Call CONTINUOUSLY inside your main loop()
+// Hardware Pin Assignments (For Hardware Team) 
+#define LED_PIN     6       
+        //  for lcd display
+#define TFT_CS      10      // CS
+#define TFT_DC      9       // D/C
+#define TFT_RST     8       // RESET
+// MOSI (Data Out) = Pin 51
+// MISO (Data In)  = Pin 50
+// SCK (Clock)     = Pin 52
 
-// --- STATE TRIGGER FUNCTIONS ---
-// Call these whenever the game logic changes state to trigger the right hardware effects.
+// DFPlayer RX connects to Mega TX1 (Pin 18). NOTE: might need to add a resistor in series
+// DFPlayer TX connects to Mega RX1 (Pin 19).
 
-void triggerInitialSettings();            // Resets system: Mic OFF, LEDs OFF, LCD says "System Ready"
-void triggerWhiteSetting();               // Sets LEDs to solid White, Mic OFF
-void triggerBlueSetting();                // Sets LEDs to solid Blue, Mic OFF
-void triggerOrangeSetting();              // Sets LEDs to solid Orange, Mic OFF
-void triggerStartQuestion();              // Call when host reads: Locks out contestant Mic (OFF)
-void triggerFloorClaimed();               // Call on buzz-in: Mic ON, plays beep, starts LED rainbow, LCD says "Answer Timer"
-void triggerCorrectAnswer(int newPoints); // Call on correct answer: Mic OFF, LEDs Green, plays win sound, displays points
-void triggerWrongOrTimeout();             // Call on wrong/timeout: Mic OFF, LEDs Red, plays error buzz, LCD says "Locked Out"
-void updateLCDTimer(int remainingSeconds);// Updates the bottom row of the LCD with the countdown timer
+// Use MicroSD card with FAT32 format
+    // FILE NAME FOR AUDIO
+    // 0001.mp3 : Floor Claimed / Buzzer Activation
+    // 0002.mp3 : Positive Feedback / Correct Answer
+    // 0003.mp3 : Negative Feedback / Locked Out / Timeout
 
+//  Executes hardware setup (Display/LED) 
+void initOutputs();   //Call once in setup().
+
+//Processes visual animations.
+void updateOutputs(); // Call continuously in loop().
+
+// Void Trigger Settings
+
+void triggerInitialSettings();            // Reverts to default standby: LEDs disabled, Display idle.
+void triggerWhiteSetting();               // Proximity event: LEDs solid White, Display detects player.
+void triggerBlueSetting();                // Standby configuration (Blue).
+void triggerOrangeSetting();              // Standby configuration (Orange).
+void triggerStartQuestion();              // Active question phase: Mutes mic, Display shows "Reading Question".
+void triggerFloorClaimed();               // Primary event: Activates mic relay, starts LED animation, plays track 1.
+void triggerCorrectAnswer(int newPoints); // Success: LEDs Green, plays track 2, updates scoring UI.
+void triggerWrongOrTimeout();             // Fail/Timeout: Mutes mic, LEDs Red, plays track 3, displays lockout UI.
+
+void updateLCDTimer(int remainingSeconds); // Refreshes the display timer parameters.
 #endif
