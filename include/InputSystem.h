@@ -18,4 +18,10 @@ int getBuzzedPlayerFromInput();
 // Returns -1 if none
 int getContestPressedPlayerFromInput();
 
+// for physical force start button
+int isForceStartPressedFromInput();
+
+// physical timeout button
+int getTimeoutPressedPlayerFromInput();
+
 #endif

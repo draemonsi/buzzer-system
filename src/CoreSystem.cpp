@@ -4,12 +4,11 @@
 #include "BuzzerOutput.h"
 #include "InputSystem.h"
 #include "HostControl.h"
+#include "config.h"
 
 /* =========================================================
    BASIC CONFIG
    ========================================================= */
-
-const int NUM_PLAYERS = 2;
 
 unsigned long mainTimerDuration   = 60000;
 unsigned long answerTimerDuration = 10000;
@@ -45,6 +44,8 @@ SystemState previousState = STATE_WAIT_FOR_PLAYERS;
 bool playerPresent[NUM_PLAYERS]   = {false};
 bool playerLockedOut[NUM_PLAYERS] = {false};
 bool playerTimedOut[NUM_PLAYERS]  = {false};
+bool timeoutWaitingForLeave[NUM_PLAYERS]  = {false};
+bool timeoutWaitingForReturn[NUM_PLAYERS] = {false};
 
 int playerScore[NUM_PLAYERS] = {0};
 
@@ -59,6 +60,8 @@ bool contestActive = false;
 
 void updateCoreState(HostAction action);
 void handleGlobalOverrides(HostAction action);
+void handlePhysicalTimeoutRequests();
+void updatePlayerTimeoutReturnStatus();
 void updateCoreOutputTriggers();
 
 void handleWaitForPlayers(HostAction action);
@@ -92,6 +95,8 @@ void restorePlayerVisuals();
 
 int getBuzzedPlayer();
 int getContestPressedPlayer();
+int getTimeoutPressedPlayer();
+bool getForceStartPressed();
 
 /* =========================================================
    CORE SETUP AND LOOP
@@ -114,6 +119,9 @@ void coreLoop() {
     playerPresent[i] = isPlayerPresent(i);
   }
 
+  updatePlayerTimeoutReturnStatus();
+  handlePhysicalTimeoutRequests();
+
   HostAction hostAction = getHostAction();
 
   handleGlobalOverrides(hostAction);
@@ -133,6 +141,16 @@ void handleGlobalOverrides(HostAction action) {
     return;
   }
 
+  if (getForceStartPressed() && currentState == STATE_WAIT_FOR_PLAYERS) {
+    currentState = STATE_PRE_GAME_IDLE;
+
+    for (int i = 0; i < NUM_PLAYERS; i++) {
+      setPlayerAvailableVisuals(i);
+    }
+
+    return;
+  }
+
   int pressedContestPlayer = getContestPressedPlayer();
 
   if (pressedContestPlayer != -1 && currentState != STATE_CONTEST) {
@@ -143,6 +161,49 @@ void handleGlobalOverrides(HostAction action) {
     contestPlayer = pressedContestPlayer;
 
     setPlayerContestVisuals(contestPlayer);
+  }
+}
+
+void handlePhysicalTimeoutRequests() {
+  int timeoutPlayer = getTimeoutPressedPlayer();
+
+  if (timeoutPlayer == -1) {
+    return;
+  }
+
+  if (timeoutPlayer < 0 || timeoutPlayer >= NUM_PLAYERS) {
+    return;
+  }
+
+  playerTimedOut[timeoutPlayer] = true;
+  timeoutWaitingForLeave[timeoutPlayer] = true;
+  timeoutWaitingForReturn[timeoutPlayer] = false;
+
+  setPlayerTimedOutVisuals(timeoutPlayer);
+}
+
+void updatePlayerTimeoutReturnStatus() {
+  for (int i = 0; i < NUM_PLAYERS; i++) {
+    if (!playerTimedOut[i]) {
+      continue;
+    }
+
+    if (timeoutWaitingForLeave[i] && !playerPresent[i]) {
+      timeoutWaitingForLeave[i] = false;
+      timeoutWaitingForReturn[i] = true;
+    }
+
+    if (timeoutWaitingForReturn[i] && playerPresent[i]) {
+      playerTimedOut[i] = false;
+      timeoutWaitingForLeave[i] = false;
+      timeoutWaitingForReturn[i] = false;
+
+      if (playerLockedOut[i]) {
+        setPlayerLockedOutVisuals(i);
+      } else {
+        setPlayerAvailableVisuals(i);
+      }
+    }
   }
 }
 
@@ -242,6 +303,8 @@ void handleBuzzerOpen(HostAction action) {
 
     return;
   }
+
+  restorePlayerVisuals();
 
   int buzzedPlayer = getBuzzedPlayer();
 
@@ -488,6 +551,8 @@ void resetWholeSystem() {
     playerScore[i] = 0;
     playerLockedOut[i] = false;
     playerTimedOut[i] = false;
+    timeoutWaitingForLeave[i] = false;
+    timeoutWaitingForReturn[i] = false;
   }
 
   mainTimeRemaining = 0;
@@ -509,4 +574,12 @@ int getBuzzedPlayer() {
 
 int getContestPressedPlayer() {
   return getContestPressedPlayerFromInput();
+}
+
+int getTimeoutPressedPlayer() {
+  return getTimeoutPressedPlayerFromInput();
+}
+
+bool getForceStartPressed() {
+  return isForceStartPressedFromInput();
 }

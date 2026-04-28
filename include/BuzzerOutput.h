@@ -2,14 +2,7 @@
 #define BUZZER_OUTPUT_H
 
 #include <Arduino.h>
-
-// ================= HARDWARE CONFIG =================
-#define NUM_LEDS    16
-#define LED_PIN     6
-
-#define TFT_CS      10
-#define TFT_DC      9
-#define TFT_RST     8
+#include <config.h>
 
 // ================= CORE OUTPUT =================
 
