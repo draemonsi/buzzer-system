@@ -2,43 +2,59 @@
 #define BUZZER_OUTPUT_H
 
 #include <Arduino.h>
-#include <config.h>
+#include "config.h" 
 
-// ================= CORE OUTPUT =================
+// Libraries Used:
+// <Adafruit_NeoPixel.h>
+// <DFRobotDFPlayerMini.h> 
+// <SPI.h>
+// <Adafruit_GFX.h>
+// <Adafruit_ILI9341.h>
 
-// Initialize all output hardware
-void initOutputs();
+/** Pin Assigments
+ * // LED STRIP SETTINGS
+// IMPORTANT: Change NUM_LEDS if more LED strips are added or removed (Increments of 8)
+#define NUM_LEDS    16      // Total series count of LED modules per player
+#define LED_PIN_1   6       // Pin for Player 1 LEDs
+#define LED_PIN_2   5       // Pin for Player 2 LEDs (
 
-// Continuous updates (animations like rainbow)
-void updateOutputs();
+// TFT LCD DISPLAY SETTINGS (Shared SPI Bus)
+#define TFT_CS_1    10      // Chip Select for Player 1
+#define TFT_CS_2    11      // Chip Select for Player 2 
+#define TFT_DC      9       // Data/Command (Shared)
+#define TFT_RST     8       // Hardware Reset (Shared)
 
-// ================= SYSTEM STATES =================
+// Common
+// MOSI = Pin 51 | MISO = Pin 50 | SCK = Pin 52
 
-// Reset / standby
-void triggerInitialSettings();
+// AUDIO SETTINGS (DFPLAYER MINI)
+// Hardware Serial1: RX = Pin 18 | TX = Pin 19
+ */
 
-// Player detected / ready
-void triggerWhiteSetting();
+// Use MicroSD card with FAT32 format
+// FILE NAME FOR AUDIO 
+// 0001.mp3 : Floor Claimed / Buzzer Activation
+// 0002.mp3 : Positive Feedback / Correct Answer
+// 0003.mp3 : Negative Feedback / Locked Out / Timeout
 
-// Contest mode (blue)
-void triggerBlueSetting();
+// Executes hardware setup (Display/LED) 
+void initOutputs();   // Call once in setup().
 
-// Timeout / inactive (orange)
-void triggerOrangeSetting();
+// Processes visual animations.
+void updateOutputs(); // Call continuously in loop().
 
-// Host asking question
-void triggerStartQuestion();
+// Void Trigger Settings (playerIndex: 1 = P1, 2 = P2, 0 = Both Players)
 
-// Player buzzed (rainbow + sound)
-void triggerFloorClaimed();
+void triggerInitialSettings(int playerIndex);  // Reverts to default standby: LEDs disabled, Display idle.
+void triggerWhiteSetting(int playerIndex);     // Proximity event: LEDs solid White, Display detects player.
+void triggerBlueSetting(int playerIndex);      // Standby configuration (Blue).
+void triggerOrangeSetting(int playerIndex);    // Standby configuration (Orange).
+void triggerStartQuestion(int playerIndex);    // Active question phase: Display shows "Reading Question".
+void triggerFloorClaimed(int playerIndex);     // Primary event: Starts LED animation, plays track 1.
+void triggerCorrectAnswer(int playerIndex, int newPoints); // Success: LEDs Green, plays track 2, updates scoring UI.
+void triggerLockedOut(int playerIndex);   // Display 'Locked Out mode'
+void triggerWrongOrTimeout(int playerIndex); // Display when wrong answer
 
-// Correct answer (green + score)
-void triggerCorrectAnswer(int newPoints);
-
-// Wrong / locked out (red)
-void triggerWrongOrTimeout();
-
-// Update timer display
-void updateLCDTimer(int remainingSeconds);
+void updateLCDTimer(int playerIndex, int remainingSeconds); // Refreshes the display timer parameters.
 
 #endif
