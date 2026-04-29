@@ -1,9 +1,10 @@
 #include <Arduino.h>
+#include "CoreSystem.h"
 
 void setup() {
-    Serial.begin(9600);
-    Serial.println("Buzzer System Initialized trial");
+  coreSetup();
 }
 
 void loop() {
+  coreLoop();
 }
