@@ -2,7 +2,7 @@
 #define BUZZER_OUTPUT_H
 
 #include <Arduino.h>
-#include "config.h" 
+#include <arduinomega/config.h>
 
 // Libraries Used:
 // <Adafruit_NeoPixel.h>

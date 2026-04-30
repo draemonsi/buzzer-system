@@ -1,10 +1,25 @@
 #include <Arduino.h>
 
-#include "CoreSystem.h"
-#include "BuzzerOutput.h"
-#include "InputSystem.h"
-#include "HostControl.h"
-#include "config.h"
+#include <arduinomega/CoreSystem.h>
+#include <arduinomega/BuzzerOutput.h>
+#include <arduinomega/InputSystem.h>
+#include <arduinomega/HostControl.h>
+#include <arduinomega/config.h>
+
+void updateCoreState(HostAction action);
+void handleGlobalOverrides(HostAction action);
+void handlePhysicalTimeoutRequests();
+void updatePlayerTimeoutReturnStatus();
+void updateCoreOutputTriggers();
+
+void handleWaitForPlayers(HostAction action);
+void handlePreGameIdle(HostAction action);
+void handleHostQuestion(HostAction action);
+void handleBuzzerOpen(HostAction action);
+void handleAnswering(HostAction action);
+void handleMainTimeout(HostAction action);
+void handleContest(HostAction action);
+void handleRoundOver(HostAction action);
 
 /* =========================================================
    BASIC CONFIG
@@ -274,7 +289,7 @@ void handlePreGameIdle(HostAction action) {
     currentState = STATE_HOST_QUESTION;
 
     // Output Team: mute contestant mics, keep host mic ON.
-    triggerStartQuestion();
+    triggerStartQuestion(action);
   }
 }
 
@@ -344,7 +359,7 @@ void handleAnswering(HostAction action) {
       // triggerCorrectAnswer(activePlayer, playerScore[activePlayer]);
 
       // Current Output Team:
-      triggerCorrectAnswer(playerScore[activePlayer]);
+      triggerCorrectAnswer(activePlayer, playerScore[activePlayer]);
     }
 
     currentState = STATE_ROUND_OVER;
@@ -403,11 +418,11 @@ void handleRoundOver(HostAction action) {
 
 void updateCoreOutputTriggers() {
   if (currentState == STATE_BUZZER_OPEN) {
-    updateLCDTimer(mainTimeRemaining / 1000);
+    updateLCDTimer(-1,mainTimeRemaining / 1000);
   }
 
   if (currentState == STATE_ANSWERING) {
-    updateLCDTimer(answerTimeRemaining / 1000);
+    updateLCDTimer(-1,answerTimeRemaining / 1000);
   }
 }
 
@@ -420,7 +435,7 @@ void setPlayerAvailableVisuals(int playerIndex) {
   // triggerWhiteSetting(playerIndex);
 
   // Current Output Team:
-  triggerWhiteSetting();
+  triggerWhiteSetting(playerIndex);
 }
 
 void setPlayerAbsentVisuals(int playerIndex) {
@@ -428,7 +443,7 @@ void setPlayerAbsentVisuals(int playerIndex) {
   // triggerInitialSettings(playerIndex);
 
   // Current Output Team:
-  triggerInitialSettings();
+  triggerInitialSettings(playerIndex);
 }
 
 void setPlayerLockedOutVisuals(int playerIndex) {
@@ -436,7 +451,7 @@ void setPlayerLockedOutVisuals(int playerIndex) {
   // triggerWrongOrTimeout(playerIndex);
 
   // Current Output Team:
-  triggerWrongOrTimeout();
+  triggerWrongOrTimeout(playerIndex);
 }
 
 void setPlayerTimedOutVisuals(int playerIndex) {
@@ -444,7 +459,7 @@ void setPlayerTimedOutVisuals(int playerIndex) {
   // triggerOrangeSetting(playerIndex);
 
   // Current Output Team:
-  triggerOrangeSetting();
+  triggerOrangeSetting(playerIndex);
 }
 
 void setPlayerBuzzedVisuals(int playerIndex) {
@@ -452,7 +467,7 @@ void setPlayerBuzzedVisuals(int playerIndex) {
   // triggerFloorClaimed(playerIndex);
 
   // Current Output Team:
-  triggerFloorClaimed();
+  triggerFloorClaimed(playerIndex);
 }
 
 void setPlayerContestVisuals(int playerIndex) {
@@ -460,7 +475,7 @@ void setPlayerContestVisuals(int playerIndex) {
   // triggerBlueSetting(playerIndex);
 
   // Current Output Team:
-  triggerBlueSetting();
+  triggerBlueSetting(playerIndex);
 }
 
 void restorePlayerVisuals() {
@@ -561,7 +576,7 @@ void resetWholeSystem() {
   currentState = STATE_WAIT_FOR_PLAYERS;
   previousState = STATE_WAIT_FOR_PLAYERS;
 
-  triggerInitialSettings();
+  triggerInitialSettings(-1);
 }
 
 /* =========================================================
