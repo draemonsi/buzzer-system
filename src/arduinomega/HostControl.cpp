@@ -1,4 +1,4 @@
-#include "HostControl.h"
-#include "config.h"
+#include "arduinomega/HostControl.h"
+#include "arduinomega/config.h"
 
 #include <Arduino.h>

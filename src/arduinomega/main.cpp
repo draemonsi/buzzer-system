@@ -1,5 +1,5 @@
 #include <Arduino.h>
-#include "CoreSystem.h"
+#include "arduinomega/CoreSystem.h"
 
 void setup() {
   coreSetup();
