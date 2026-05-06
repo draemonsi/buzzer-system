@@ -1,4 +1,4 @@
-#include "ESP32_HostPanel.h"
+#include "esp32/ESP32_HostPanel.h"
 
 // --- GLOBALS ---
 Adafruit_ILI9341 tft = Adafruit_ILI9341(TFT_CS, TFT_DC, TFT_RST);
