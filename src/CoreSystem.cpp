@@ -1,10 +1,10 @@
 #include <Arduino.h>
 
-#include "CoreSystem.h"
-#include "BuzzerOutput.h"
-#include "InputSystem.h"
-#include "HostControl.h"
-#include "config.h"
+#include "arduinomega/CoreSystem.h"
+#include "arduinomega/BuzzerOutput.h"
+#include "arduinomega/InputSystem.h"
+#include "arduinomega/HostControl.h"
+#include "arduinomega/config.h"
 
 /* =========================================================
    BASIC CONFIG
